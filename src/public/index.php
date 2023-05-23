@@ -7,20 +7,28 @@ $pdo = new PDO(
     $dbPassword
 );
 
-$sql = 'SELECT * FROM pages';
-$statement = $pdo->prepare($sql);
-$statement->execute();
-$pages = $statement->fetchAll(PDO::FETCH_ASSOC);
+if (isset($_GET['keyword'])) {
+    $keyword = $_GET['keyword'];
 
-foreach ($pages as $key => $value) {
-    $standard_key_array[$key] = $value['created_at'];
+    $sql = "SELECT * FROM pages WHERE title LIKE :keyword OR content LIKE :keyword";
+    $statement = $pdo->prepare($sql);
+    $statement->bindValue(':keyword', '%' . $keyword . '%', PDO::PARAM_STR);
+    $statement->execute();
+    $pages = $statement->fetchAll(PDO::FETCH_ASSOC);
+} else {
+    $sql = 'SELECT * FROM pages';
+    $statement = $pdo->prepare($sql);
+    $statement->execute();
+    $pages = $statement->fetchAll(PDO::FETCH_ASSOC);
 }
-array_multisort($standard_key_array, SORT_DESC, $pages);
 ?>
 
 <body>
-
   <div>
+    <form method="GET" action="">
+      <input type="text" name="keyword" placeholder="検索キーワードを入力してください">
+      <button type="submit">検索</button>
+    </form>
     <a href="./create.php">メモを追加</a><br>
   </div>
 
@@ -46,5 +54,4 @@ array_multisort($standard_key_array, SORT_DESC, $pages);
 
     </table>
   </div>
-
 </body>
